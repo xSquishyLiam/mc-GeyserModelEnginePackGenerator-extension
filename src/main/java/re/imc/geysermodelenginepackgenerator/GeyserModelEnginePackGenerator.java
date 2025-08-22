@@ -1,43 +1,43 @@
 package re.imc.geysermodelenginepackgenerator;
 
-import me.zimzaza4.geyserutils.geyser.GeyserUtils;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.geyser.api.command.Command;
-import org.geysermc.geyser.api.command.CommandExecutor;
 import org.geysermc.geyser.api.command.CommandSource;
 import org.geysermc.geyser.api.event.lifecycle.GeyserDefineCommandsEvent;
-import org.geysermc.geyser.api.event.lifecycle.GeyserLoadResourcePacksEvent;
+import org.geysermc.geyser.api.event.lifecycle.GeyserDefineResourcePacksEvent;
 import org.geysermc.geyser.api.event.lifecycle.GeyserPreInitializeEvent;
 import org.geysermc.geyser.api.extension.Extension;
-import org.geysermc.geyser.api.extension.ExtensionLogger;
+import org.geysermc.geyser.api.pack.PackCodec;
+import org.geysermc.geyser.api.pack.ResourcePack;
+import re.imc.geysermodelenginepackgenerator.managers.ConfigManager;
 import re.imc.geysermodelenginepackgenerator.generator.Entity;
-import re.imc.geysermodelenginepackgenerator.generator.Geometry;
 import re.imc.geysermodelenginepackgenerator.util.ZipUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.List;
 import java.util.zip.ZipOutputStream;
 
-public class ExtensionMain implements Extension {
+public class GeyserModelEnginePackGenerator implements Extension {
+
+    private static GeyserModelEnginePackGenerator extension;
 
     private File source;
 
-    public static ExtensionLogger logger;
-    Path generatedPackZip;
+    private Path generatedPackZip;
+
+    private ConfigManager configManager;
 
     @Subscribe
     public void onLoad(GeyserPreInitializeEvent event) {
+        extension = this;
+
+        loadManagers();
+
         source = dataFolder().resolve("input").toFile();
         source.mkdirs();
-        logger = logger();
         loadConfig();
-
     }
 
     @Subscribe
@@ -45,9 +45,8 @@ public class ExtensionMain implements Extension {
         event.register(Command.builder(this)
                 .name("reload")
                 .source(CommandSource.class)
-                .executableOnConsole(true)
+                .playerOnly(false)
                 .description("GeyserModelPackGenerator Reload Command")
-                .suggestedOpOnly(true)
                 .permission("geysermodelenginepackgenerator.admin")
                 .executor((source, command, args) -> {
                     loadConfig();
@@ -57,7 +56,6 @@ public class ExtensionMain implements Extension {
     }
 
     public void loadConfig() {
-
         File generatedPack = dataFolder().resolve("generated_pack").toFile();
 
         GeneratorMain.startGenerate(source, generatedPack);
@@ -66,23 +64,28 @@ public class ExtensionMain implements Extension {
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(generatedPackZip))) {
             ZipUtil.compressFolder(generatedPack, null, zipOutputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException err) {
+            throw new RuntimeException(err);
         }
 
         for (Entity entity : GeneratorMain.entityMap.values()) {
             entity.register();
         }
-
     }
 
+    private void loadManagers() {
+        this.configManager = new ConfigManager();
+    }
 
     @Subscribe
-    public void onPackLoad(GeyserLoadResourcePacksEvent event) {
-        if (Boolean.parseBoolean(System.getProperty("geyser-model-engine-auto-load-pack", "true"))) {
-            event.resourcePacks().add(generatedPackZip);
-        }
+    public void onPackLoad(GeyserDefineResourcePacksEvent event) {
+        if (!configManager.getConfig().getBoolean("options.resource-pack.auto-load")) return;
+
+        ResourcePack resourcePack = ResourcePack.builder(PackCodec.path(generatedPackZip)).build();
+        event.register(resourcePack);
     }
 
-
+    public static GeyserModelEnginePackGenerator getExtension() {
+        return extension;
+    }
 }

@@ -4,20 +4,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import re.imc.geysermodelenginepackgenerator.GeneratorMain;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 public class Animation {
 
     public static final String HEAD_TEMPLATE = """
@@ -29,16 +21,16 @@ public class Animation {
             }
             """;
 
-    String modelId;
-    JsonObject json;
-    @Getter
-    Set<String> animationIds = new HashSet<>();
+    private String modelId;
+    private JsonObject json;
+    private Set<String> animationIds = new HashSet<>();
 
-    String path;
+    private String path;
 
     public void load(String string) {
-        this.json = new JsonParser().parse(string).getAsJsonObject();
+        this.json = JsonParser.parseString(string).getAsJsonObject();
         JsonObject newAnimations = new JsonObject();
+
         for (Map.Entry<String, JsonElement> element : json.get("animations").getAsJsonObject().entrySet()) {
             animationIds.add(element.getKey());
             JsonObject animation = element.getValue().getAsJsonObject();
@@ -77,7 +69,7 @@ public class Animation {
                                             }
                                         }
                                     }
-                                } catch (Throwable t) {}
+                                } catch (Throwable ignored) {}
                                 if (end != null && end.has("lerp_mode") && end.get("lerp_mode").getAsString().equals("catmullrom")) {
                                     end.addProperty("lerp_mode", "linear");
                                 }
@@ -98,31 +90,61 @@ public class Animation {
         object.addProperty("loop", true);
         JsonObject bones = new JsonObject();
         JsonArray array = geometry.getInternal().get("bones").getAsJsonArray();
+
         int i = 0;
+
         for (JsonElement element : array) {
             if (element.isJsonObject()) {
                 String name = element.getAsJsonObject().get("name").getAsString();
 
                 String parent = "";
-                if (element.getAsJsonObject().has("parent")) {
-                    parent = element.getAsJsonObject().get("parent").getAsString();
-                }
-                if (parent.startsWith("h_") || parent.startsWith("hi_")) {
-                    continue;
-                }
+                if (element.getAsJsonObject().has("parent")) parent = element.getAsJsonObject().get("parent").getAsString();
+                if (parent.startsWith("h_") || parent.startsWith("hi_")) continue;
+
                 if (name.startsWith("h_") || name.startsWith("hi_")) {
-                    bones.add(name, new JsonParser().parse(HEAD_TEMPLATE));
+                    bones.add(name, JsonParser.parseString(HEAD_TEMPLATE));
                     i++;
                 }
             }
         }
-        if (i == 0) {
-            return;
-        }
-        GeneratorMain.entityMap
-                        .get(modelId).setHasHeadAnimation(true);
+
+        if (i == 0) return;
+
+        GeneratorMain.entityMap.get(modelId).setHasHeadAnimation(true);
 
         object.add("bones", bones);
         json.get("animations").getAsJsonObject().add("animation." + modelId + ".look_at_target", object);
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
+    }
+
+    public void setJson(JsonObject json) {
+        this.json = json;
+    }
+
+    public void setAnimationIds(Set<String> animationIds) {
+        this.animationIds = animationIds;
+    }
+
+    public String getModelId() {
+        return modelId;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public JsonObject getJson() {
+        return json;
+    }
+
+    public Set<String> getAnimationIds() {
+        return animationIds;
+    }
+
+    public String getPath() {
+        return path;
     }
 }

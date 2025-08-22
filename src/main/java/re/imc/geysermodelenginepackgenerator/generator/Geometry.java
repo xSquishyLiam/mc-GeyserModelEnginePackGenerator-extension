@@ -5,26 +5,20 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.geysermc.geyser.api.extension.ExtensionLogger;
-import re.imc.geysermodelenginepackgenerator.ExtensionMain;
 
 import java.util.*;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 public class Geometry {
 
+    private String modelId;
+    private String geometryId;
+    private JsonObject json;
+    private Map<String, Bone> bones = new HashMap<>();
 
-    String modelId;
-    String geometryId;
-    JsonObject json;
-    Map<String, Bone> bones = new HashMap<>();
+    private String path;
 
-    String path;
     public void load(String json) {
-        this.json = new JsonParser().parse(json).getAsJsonObject();
+        this.json = JsonParser.parseString(json).getAsJsonObject();
     }
     public void setId(String id) {
         geometryId = id;
@@ -45,7 +39,6 @@ public class Geometry {
     }
 
     public void modify() {
-
         JsonArray array = getInternal().get("bones").getAsJsonArray();
         Iterator<JsonElement> iterator = array.iterator();
         while (iterator.hasNext()) {
@@ -55,23 +48,20 @@ public class Geometry {
 
                 String parent = element.getAsJsonObject().has("parent") ? element.getAsJsonObject().get("parent").getAsString().toLowerCase() : null;
                 element.getAsJsonObject().remove("name");
-
                 element.getAsJsonObject().addProperty("name", name);
 
-                if (name.equals("hitbox") ||
-                        name.equals("shadow") ||
-                        name.equals("mount") ||
-                        name.startsWith("b_") ||
-                        name.startsWith("ob_")) {
+                if (name.equals("hitbox") || name.equals("shadow") || name.equals("mount") || name.startsWith("b_") || name.startsWith("ob_")) {
                     iterator.remove();
-                } else bones.put(name, new Bone(name, parent, new HashSet<>(), new HashSet<>()));
+                } else {
+                    bones.put(name, new Bone(name, parent, new HashSet<>(), new HashSet<>()));
+                }
             }
 
             for (Bone bone : bones.values()) {
-                if (bone.parent != null) {
-                    Bone parent = bones.get(bone.parent);
+                if (bone.getParent() != null) {
+                    Bone parent = bones.get(bone.getParent());
                     if (parent != null) {
-                        parent.children.add(bone);
+                        parent.getChildren().add(bone);
                         addAllChildren(parent, bone);
                     }
                 }
@@ -81,10 +71,46 @@ public class Geometry {
     }
 
     public void addAllChildren(Bone p, Bone c) {
-        p.allChildren.add(c);
-        Bone parent = bones.get(p.parent);
+        p.getAllChildren().add(c);
+        Bone parent = bones.get(p.getParent());
         if (parent != null) {
             addAllChildren(parent, c);
         }
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
+    }
+
+    public void setGeometryId(String geometryId) {
+        this.geometryId = geometryId;
+    }
+
+    public void setJson(JsonObject json) {
+        this.json = json;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getModelId() {
+        return modelId;
+    }
+
+    public String getGeometryId() {
+        return geometryId;
+    }
+
+    public JsonObject getJson() {
+        return json;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public Map<String, Bone> getBones() {
+        return bones;
     }
 }

@@ -3,6 +3,7 @@ package re.imc.geysermodelenginepackgenerator.generator;
 import java.util.UUID;
 
 public class PackManifest {
+
     public static final String TEMPLATE = """
             {
               "format_version": 1,

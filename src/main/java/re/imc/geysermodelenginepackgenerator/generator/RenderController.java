@@ -29,11 +29,10 @@ public class RenderController {
         root.add("render_controllers", renderControllers);
 
         Set<Bone> processedBones = new HashSet<>();
-        boolean singleTexture = entity.textureMap.size() == 1 && entity.modelConfig.getPerTextureUvSize().isEmpty();
-        for (String key : entity.textureMap.keySet()) {
-            if (key.endsWith("_e")) {
-                continue;
-            }
+        boolean singleTexture = entity.getTextureMap().size() == 1 && entity.getModelConfig().getPerTextureUvSize().isEmpty();
+        for (String key : entity.getTextureMap().keySet()) {
+            if (key.endsWith("_e")) continue;
+
             // Texture texture = entity.textureMap.get(key);
             Set<String> uvBonesId = entity.getModelConfig().bingingBones.get(key);
 
@@ -149,11 +148,11 @@ public class RenderController {
                 if (!processedBones.contains(bone) && (uvParent || uvAllBones.contains(boneName) || uvBonesId.contains("*"))) {
                     int index = i;
                     if (boneName.startsWith("uv_")) {
-                        index = sorted.indexOf(bone.parent);
+                        index = sorted.indexOf(bone.getParent());
                     }
 
                     int n = (int) Math.pow(2, (index % 24));
-                    if (entity.modelConfig.isDisablePartVisibility()) {
+                    if (entity.getModelConfig().isDisablePartVisibility()) {
                         visibilityItem.addProperty(boneName, true);
                     } else {
                         visibilityItem.addProperty(boneName, "math.mod(math.floor(query.property('modelengine:bone" + index / 24 + "') / " + n + "), 2) == 1");

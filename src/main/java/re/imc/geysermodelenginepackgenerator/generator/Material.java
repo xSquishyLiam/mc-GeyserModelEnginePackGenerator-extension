@@ -26,7 +26,7 @@ public class Material {
                                 ],
                                 "msaaSupport": "Both"
                             },
-                            
+            
                             "entity_alphatest_anim_change_color_one_sided:entity_alphatest_change_color_one_sided":{
                                 "+defines":[
                                     "USE_UV_ANIM"

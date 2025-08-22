@@ -9,8 +9,6 @@ import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 @ToString
 public class ModelConfig {
 
@@ -31,12 +29,68 @@ public class ModelConfig {
     @SerializedName("disable_part_visibility")
     boolean disablePartVisibility = true;
 
+    public void setEnableHeadRotation(boolean enableHeadRotation) {
+        this.enableHeadRotation = enableHeadRotation;
+    }
+
+    public void setMaterial(String material) {
+        this.material = material;
+    }
+
+    public void setEnableBlendTransition(boolean enableBlendTransition) {
+        this.enableBlendTransition = enableBlendTransition;
+    }
+
+    public void setBingingBones(Map<String, Set<String>> bingingBones) {
+        this.bingingBones = bingingBones;
+    }
+
+    public void setAnimTextures(Map<String, AnimTextureOptions> animTextures) {
+        this.animTextures = animTextures;
+    }
+
+    public void setTextureMaterials(Map<String, String> textureMaterials) {
+        this.textureMaterials = textureMaterials;
+    }
+
+    public void setPerTextureUvSize(Map<String, Integer[]> perTextureUvSize) {
+        this.perTextureUvSize = perTextureUvSize;
+    }
+
+    public void setDisablePartVisibility(boolean disablePartVisibility) {
+        this.disablePartVisibility = disablePartVisibility;
+    }
+
     public Map<String, String> getTextureMaterials() {
         return textureMaterials != null ? textureMaterials : Map.of();
     }
 
     public Map<String, Integer[]> getPerTextureUvSize() {
         return perTextureUvSize != null ? perTextureUvSize : Map.of();
+    }
+
+    public boolean isEnableHeadRotation() {
+        return enableHeadRotation;
+    }
+
+    public String getMaterial() {
+        return material;
+    }
+
+    public boolean isEnableBlendTransition() {
+        return enableBlendTransition;
+    }
+
+    public Map<String, Set<String>> getBingingBones() {
+        return bingingBones;
+    }
+
+    public Map<String, AnimTextureOptions> getAnimTextures() {
+        return animTextures;
+    }
+
+    public boolean isDisablePartVisibility() {
+        return disablePartVisibility;
     }
 
     @NoArgsConstructor

@@ -1,23 +1,34 @@
 package re.imc.geysermodelenginepackgenerator.generator;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
 public class Bone {
-    String name;
-    String parent;
-    Set<Bone> children = new HashSet<>();
-    Set<Bone> allChildren = new HashSet<>();
+
+   private final String name;
+   private final String parent;
+   private final Set<Bone> children;
+   private final Set<Bone> allChildren;
+
+   public Bone(String name, String parent, Set<Bone> children, Set<Bone> allChildren) {
+       this.name = name;
+       this.parent = parent;
+       this.children = children;
+       this.allChildren = allChildren;
+   }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getParent() {
+        return parent;
+    }
+
+    public Set<Bone> getChildren() {
+        return children;
+    }
+
+    public Set<Bone> getAllChildren() {
+        return allChildren;
+    }
 }
