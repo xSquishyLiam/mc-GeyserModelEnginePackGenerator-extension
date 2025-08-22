@@ -12,6 +12,12 @@ import java.util.Set;
 
 public class Animation {
 
+    private String modelId;
+    private JsonObject json;
+    private Set<String> animationIds = new HashSet<>();
+
+    private String path;
+
     public static final String HEAD_TEMPLATE = """
              {
                "relative_to" : {
@@ -20,12 +26,6 @@ public class Animation {
                "rotation" : [ "query.target_x_rotation - this", "query.target_y_rotation - this", 0.0 ]
             }
             """;
-
-    private String modelId;
-    private JsonObject json;
-    private Set<String> animationIds = new HashSet<>();
-
-    private String path;
 
     public void load(String string) {
         this.json = JsonParser.parseString(string).getAsJsonObject();
@@ -42,6 +42,7 @@ public class Animation {
                         // play once but override must use this to avoid strange anim
                     }
                 }
+
                 animation.remove("override_previous_animation");
             }
 
@@ -81,8 +82,8 @@ public class Animation {
 
             newAnimations.add("animation." + modelId + "." + element.getKey().replace(" ", "_"), element.getValue());
         }
-        json.add("animations", newAnimations);
 
+        json.add("animations", newAnimations);
     }
 
     public void addHeadBind(Geometry geometry) {

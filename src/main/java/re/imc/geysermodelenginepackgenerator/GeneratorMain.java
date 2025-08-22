@@ -50,8 +50,8 @@ public class GeneratorMain {
         if (textureConfigFile != null) {
             try {
                 modelConfig = GSON.fromJson(new InputStreamReader(zip.getInputStream(textureConfigFile)), ModelConfig.class);
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException err) {
+                throw new RuntimeException(err);
             }
         }
         boolean canAdd = false;
@@ -72,11 +72,9 @@ public class GeneratorMain {
                     throw new RuntimeException(err);
                 }
                 entity.setTextureMap(map);
-                if (modelConfig.getBingingBones().isEmpty()) {
-                    modelConfig.getBingingBones().put(textureName, Set.of("*"));
-                }
-
+                if (modelConfig.getBingingBones().isEmpty()) modelConfig.getBingingBones().put(textureName, Set.of("*"));
             }
+
             if (e.getName().endsWith(".json")) {
                 try {
                     InputStream stream = zip.getInputStream(e);
@@ -100,8 +98,8 @@ public class GeneratorMain {
                         entity.setGeometry(geometry);
                         canAdd = true;
                     }
-                } catch (IOException ex) {
-                    ex.printStackTrace();
+                } catch (IOException err) {
+                    throw new RuntimeException(err);
                 }
             }
         }
@@ -208,7 +206,6 @@ public class GeneratorMain {
                     shouldOverrideConfig = true;
                     oldConfig.delete();
                 }
-
             } catch (IOException err) {
                 throw new RuntimeException(err);
             }
@@ -316,9 +313,7 @@ public class GeneratorMain {
 
                         entry.getValue().setId(id + "_" + suffix);
 
-                        if (path.toFile().exists()) {
-                            continue;
-                        }
+                        if (path.toFile().exists()) continue;
 
                         try {
                             Files.writeString(path, GSON.toJson(entry.getValue().getJson()), StandardCharsets.UTF_8);
@@ -345,13 +340,10 @@ public class GeneratorMain {
                 Path path = texturesFolder.toPath().resolve(entry.getValue().getPath() + textures.getKey() + "/" + entry.getKey() + ".png");
                 path.toFile().getParentFile().mkdirs();
 
-                if (path.toFile().exists()) {
-                    continue;
-                }
+                if (path.toFile().exists()) continue;
+
                 try {
-                    if (entry.getValue().getImage() != null) {
-                        Files.write(path, entry.getValue().getImage());
-                    }
+                    if (entry.getValue().getImage() != null) Files.write(path, entry.getValue().getImage());
                 } catch (IOException err) {
                     throw new RuntimeException(err);
                 }
@@ -380,9 +372,8 @@ public class GeneratorMain {
             RenderController controller = new RenderController(id, geometryMap.get(id).getBones(), entity);
             entity.setRenderController(controller);
             Path renderPath = new File(renderControllersFolder, "controller.render." + id + ".json").toPath();
-            if (renderPath.toFile().exists()) {
-                continue;
-            }
+            if (renderPath.toFile().exists()) continue;
+
             try {
                 Files.writeString(renderPath, controller.generate(), StandardCharsets.UTF_8);
             } catch (IOException err) {

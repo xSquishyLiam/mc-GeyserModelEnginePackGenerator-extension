@@ -34,8 +34,7 @@ public class Geometry {
     }
 
     public JsonObject getInternal() {
-        return json.get("minecraft:geometry").getAsJsonArray().get(0)
-                .getAsJsonObject();
+        return json.get("minecraft:geometry").getAsJsonArray().get(0).getAsJsonObject();
     }
 
     public void modify() {

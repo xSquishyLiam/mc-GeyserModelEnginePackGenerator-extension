@@ -13,6 +13,9 @@ import java.util.Map;
 
 public class AnimationController {
 
+    private JsonObject json;
+    private Entity entity;
+
     public static final String CONTROLLER_TEMPLATE =
             """
                    {
@@ -32,9 +35,6 @@ public class AnimationController {
                         }
                      }
                    """;
-
-    private JsonObject json;
-    private Entity entity;
 
     public void load(Animation animation, Entity entity) {
         JsonObject root = new JsonObject();

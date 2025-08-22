@@ -81,7 +81,7 @@ public class GeyserModelEnginePackGenerator implements Extension {
     public void onPackLoad(GeyserDefineResourcePacksEvent event) {
         if (!configManager.getConfig().getBoolean("options.resource-pack.auto-load")) return;
 
-        ResourcePack resourcePack = ResourcePack.builder(PackCodec.path(generatedPackZip)).build();
+        ResourcePack resourcePack = ResourcePack.create(PackCodec.path(generatedPackZip));
         event.register(resourcePack);
     }
 

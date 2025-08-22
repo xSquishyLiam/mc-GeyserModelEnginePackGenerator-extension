@@ -57,9 +57,9 @@ public class RenderController {
             } else {
                 controller.addProperty("geometry", "Geometry.default");
             }
+
             JsonArray materials = new JsonArray();
             String material = entity.getModelConfig().getTextureMaterials().get(key);
-
 
             JsonObject materialItem = new JsonObject();
             if (material != null) {
@@ -88,6 +88,7 @@ public class RenderController {
             } else {
                 textures.add("Texture." + key);
             }
+
             controller.add("textures", textures);
 
             // if (enable) {
@@ -115,9 +116,9 @@ public class RenderController {
                 if (uvBone.equals("*")) {
                     uvAllBones.addAll(bones.keySet());
                 }
-                if (!bones.containsKey(uvBone.toLowerCase())) {
-                    continue;
-                }
+
+                if (!bones.containsKey(uvBone.toLowerCase())) continue;
+
                 uvAllBones.add(uvBone.toLowerCase());
             }
 
@@ -137,9 +138,8 @@ public class RenderController {
 
 
                 for (Map.Entry<String, Set<String>> entry : entity.getModelConfig().bingingBones.entrySet()) {
-                    if (entry.getKey().equals(key)) {
-                        continue;
-                    }
+                    if (entry.getKey().equals(key)) continue;
+
                     if (entry.getValue().stream().anyMatch(boneName::equalsIgnoreCase)) {
                         uvParent = false;
                         break;
