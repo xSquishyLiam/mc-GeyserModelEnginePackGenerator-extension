@@ -5,6 +5,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 import re.imc.geysermodelenginepackgenerator.GeyserModelEnginePackGenerator;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -124,6 +125,10 @@ public class FileConfiguration {
     public boolean isBoolean(String path) {
         CommentedConfigurationNode node = getInternal(path);
         return node != null && node.raw() instanceof Boolean;
+    }
+
+    public File toFile() {
+        return this.dataDirectory.resolve(configFile).toFile();
     }
 
     private CommentedConfigurationNode getInternal(String path) {

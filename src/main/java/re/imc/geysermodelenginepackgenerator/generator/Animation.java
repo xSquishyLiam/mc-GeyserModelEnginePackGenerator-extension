@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import re.imc.geysermodelenginepackgenerator.GeneratorMain;
+import re.imc.geysermodelenginepackgenerator.GeyserModelEnginePackGenerator;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -111,7 +111,7 @@ public class Animation {
 
         if (i == 0) return;
 
-        GeneratorMain.entityMap.get(modelId).setHasHeadAnimation(true);
+        GeyserModelEnginePackGenerator.getExtension().getResourcePackManager().getEntityCache().get(modelId).setHasHeadAnimation(true);
 
         object.add("bones", bones);
         json.get("animations").getAsJsonObject().add("animation." + modelId + ".look_at_target", object);

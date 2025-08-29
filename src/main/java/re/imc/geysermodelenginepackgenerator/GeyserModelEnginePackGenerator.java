@@ -10,24 +10,14 @@ import org.geysermc.geyser.api.extension.Extension;
 import org.geysermc.geyser.api.pack.PackCodec;
 import org.geysermc.geyser.api.pack.ResourcePack;
 import re.imc.geysermodelenginepackgenerator.managers.ConfigManager;
-import re.imc.geysermodelenginepackgenerator.generator.Entity;
-import re.imc.geysermodelenginepackgenerator.util.ZipUtil;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.zip.ZipOutputStream;
+import re.imc.geysermodelenginepackgenerator.managers.resourcepack.ResourcePackManager;
 
 public class GeyserModelEnginePackGenerator implements Extension {
 
     private static GeyserModelEnginePackGenerator extension;
 
-    private File source;
-
-    private Path generatedPackZip;
-
     private ConfigManager configManager;
+    private ResourcePackManager resourcePackManager;
 
     @Subscribe
     public void onLoad(GeyserPreInitializeEvent event) {
@@ -35,9 +25,7 @@ public class GeyserModelEnginePackGenerator implements Extension {
 
         loadManagers();
 
-        source = dataFolder().resolve("input").toFile();
-        source.mkdirs();
-        loadConfig();
+        resourcePackManager.loadPack();
     }
 
     @Subscribe
@@ -49,43 +37,34 @@ public class GeyserModelEnginePackGenerator implements Extension {
                 .description("GeyserModelPackGenerator Reload Command")
                 .permission("geysermodelenginepackgenerator.admin")
                 .executor((source, command, args) -> {
-                    loadConfig();
+                    resourcePackManager.loadPack();
                     source.sendMessage("GeyserModelEnginePackGenerator reloaded!");
                 })
                 .build());
     }
 
-    public void loadConfig() {
-        File generatedPack = dataFolder().resolve("generated_pack").toFile();
+    @Subscribe
+    public void onPackLoad(GeyserDefineResourcePacksEvent event) {
+        if (!extension.getConfigManager().getConfig().getBoolean("options.resource-pack.auto-load")) return;
 
-        GeneratorMain.startGenerate(source, generatedPack);
-
-        generatedPackZip = dataFolder().resolve("generated_pack.zip");
-
-        try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(generatedPackZip))) {
-            ZipUtil.compressFolder(generatedPack, null, zipOutputStream);
-        } catch (IOException err) {
-            throw new RuntimeException(err);
-        }
-
-        for (Entity entity : GeneratorMain.entityMap.values()) {
-            entity.register();
-        }
+        ResourcePack resourcePack = ResourcePack.create(PackCodec.path(resourcePackManager.getGeneratedPackZipPath()));
+        event.register(resourcePack);
     }
 
     private void loadManagers() {
         this.configManager = new ConfigManager();
-    }
-
-    @Subscribe
-    public void onPackLoad(GeyserDefineResourcePacksEvent event) {
-        if (!configManager.getConfig().getBoolean("options.resource-pack.auto-load")) return;
-
-        ResourcePack resourcePack = ResourcePack.create(PackCodec.path(generatedPackZip));
-        event.register(resourcePack);
+        this.resourcePackManager = new ResourcePackManager(this);
     }
 
     public static GeyserModelEnginePackGenerator getExtension() {
         return extension;
+    }
+
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+
+    public ResourcePackManager getResourcePackManager() {
+        return resourcePackManager;
     }
 }
